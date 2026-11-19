@@ -43,7 +43,24 @@ translations.cs = {
   ...translations.cs
 };
 
-let language = new URLSearchParams(location.search).get("lang") || localStorage.getItem("avardo-language") || "cs";
+function readStoredLanguage() {
+  try {
+    return localStorage.getItem("avardo-language");
+  } catch (error) {
+    console.warn("Language preference could not be read.", error);
+    return null;
+  }
+}
+
+function storeLanguage(value) {
+  try {
+    localStorage.setItem("avardo-language", value);
+  } catch (error) {
+    console.warn("Language preference could not be saved.", error);
+  }
+}
+
+let language = new URLSearchParams(location.search).get("lang") || readStoredLanguage() || "cs";
 if (!translations[language]) language = "cs";
 
 function applyLanguage(nextLanguage) {
@@ -76,10 +93,13 @@ function applyLanguage(nextLanguage) {
     ? (language === "en" ? "Information about Avardo's processing of personal data." : "Základní informace o zpracování osobních údajů při odeslání poptávky společnosti Avardo.")
     : (language === "en" ? "Professional cleaning for businesses, homes and accommodation properties in Brno." : "Pravidelný úklid firemních prostor, domácností a ubytovacích zařízení v Brně."));
   document.querySelector('meta[property="og:locale"]')?.setAttribute("content", language === "en" ? "en_US" : "cs_CZ");
-  localStorage.setItem("avardo-language", language);
+  storeLanguage(language);
 }
 
-document.querySelectorAll("[data-language]").forEach((button) => button.addEventListener("click", () => applyLanguage(button.dataset.language)));
+document.addEventListener("click", (event) => {
+  const button = event.target.closest?.("[data-language]");
+  if (button) applyLanguage(button.dataset.language);
+});
 menuToggle?.addEventListener("click", () => {
   const isOpen = menuToggle.getAttribute("aria-expanded") === "true";
   menuToggle.setAttribute("aria-expanded", String(!isOpen));
