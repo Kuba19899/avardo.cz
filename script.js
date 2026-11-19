@@ -24,7 +24,26 @@ const translations = {
   }
 };
 
-let language = localStorage.getItem("avardo-language") || new URLSearchParams(location.search).get("lang") || "cs";
+const czechDomTranslations = {};
+const czechDomPlaceholders = {};
+const czechDomAria = {};
+document.querySelectorAll("[data-i18n]").forEach((element) => {
+  czechDomTranslations[element.dataset.i18n] = element.innerHTML;
+});
+document.querySelectorAll("[data-i18n-placeholder]").forEach((element) => {
+  czechDomPlaceholders[element.dataset.i18nPlaceholder] = element.placeholder;
+});
+document.querySelectorAll("[data-i18n-aria]").forEach((element) => {
+  czechDomAria[element.dataset.i18nAria] = element.getAttribute("aria-label");
+});
+translations.cs = {
+  ...czechDomTranslations,
+  ...czechDomPlaceholders,
+  ...czechDomAria,
+  ...translations.cs
+};
+
+let language = new URLSearchParams(location.search).get("lang") || localStorage.getItem("avardo-language") || "cs";
 if (!translations[language]) language = "cs";
 
 function applyLanguage(nextLanguage) {
